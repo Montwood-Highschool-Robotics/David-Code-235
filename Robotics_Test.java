@@ -3,12 +3,29 @@ package org.firstinspires.ftc.teamcode;
 import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Surface;
+import android.content.ComponentCallbacks;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.util.Log;
+import android.widget.LinearLayout;
+import android.media.MediaCodec;
+import android.media.MediaRecorder;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier;
+import com.qualcomm.robotcore.robocol.Command;
+import com.qualcomm.robotcore.robot.RobotState;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.util.GlobalWarningSource;
+import com.qualcomm.robotcore.util.MovingStatistics;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -18,6 +35,29 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
+
+import org.firstinspires.ftc.robotcore.external.android.util.Size;
+import org.firstinspires.ftc.robotcore.external.function.Consumer;
+import org.firstinspires.ftc.robotcore.external.function.Continuation;
+import org.firstinspires.ftc.robotcore.external.function.ContinuationResult;
+import org.firstinspires.ftc.robotcore.external.stream.CameraStreamServer;
+import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
+import org.firstinspires.ftc.robotcore.internal.network.NetworkConnectionHandler;
+import org.firstinspires.ftc.robotcore.internal.network.RobotCoreCommandList;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.openftc.easyopencv.OpenCvCamera;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.concurrent.CountDownLatch;
 
 @TeleOp
 public class
@@ -32,6 +72,40 @@ Robotics_Test extends LinearOpMode {
     NormalizedColorSensor colorSensor;
     View relativeLayout;
 
+
+    public abstract class OpenCvCameraBase implements OpenCvCamera, CameraStreamSource, GlobalWarningSource {
+        private OpenCvPipeline pipeline = null;
+        private LinearLayout viewportContainerLayout;
+        private MovingStatistics msFrameIntervalRollingAverage;
+        private MovingStatistics msUserPipelineRollingAverage;
+        private MovingStatistics msTotalFrameProcessingTimeRollingAverage;
+        private ElapsedTime timer;
+        private OpenCvViewport viewport;
+        private int containerLayoutId;
+        private OpenCvCameraRotation rotation;
+        private int frameCount = 0;
+        private float avgFps;
+        private int avgPipelineTime;
+        private int avgOverheadTime;
+        private int avgTotalFrameTime;
+        private long currentFrameStartTime;
+        private final Object bitmapFrameLock = new Object();
+        private Continuation<? extends Consumer<Bitmap>> bitmapContinuation;
+        private Mat rotatedMat = new Mat();
+        private Mat matToUseIfPipelineReturnedCropped;
+        private Mat croppedColorCvtedMat = new Mat();
+        private Scalar brown = new Scalar(82, 61, 46, 255);
+        private OpModeNotificationsForOrientation opModeNotificationsForOrientation= new OpModeNotificationsForOrientation();
+        private ComponentCallbacksForRotation componentCallbacksForRotation = new ComponentCallbacksForRotation();
+        private volatile boolean hasBeenCleanedUp = false;
+        private final Object pipelineChangeLock = new Object();
+        private final Object viewportLock = new Object();
+        private MediaRecorder mediaRecorder;
+        private Surface mediaRecorderSurface;
+        private long mediaRecorderSurfaceNativeHandle;
+        private int width;
+        private int height;
+    }
     @Override
     public void runOpMode() throws InterruptedException {
 

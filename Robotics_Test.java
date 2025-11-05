@@ -53,11 +53,16 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvNativeViewViewport;
+import org.openftc.easyopencv.OpenCvSurfaceViewViewport;
+import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
+
 
 @TeleOp
 public class
@@ -73,39 +78,8 @@ Robotics_Test extends LinearOpMode {
     View relativeLayout;
 
 
-    public abstract class OpenCvCameraBase implements OpenCvCamera, CameraStreamSource, GlobalWarningSource {
-        private OpenCvPipeline pipeline = null;
-        private LinearLayout viewportContainerLayout;
-        private MovingStatistics msFrameIntervalRollingAverage;
-        private MovingStatistics msUserPipelineRollingAverage;
-        private MovingStatistics msTotalFrameProcessingTimeRollingAverage;
-        private ElapsedTime timer;
-        private OpenCvViewport viewport;
-        private int containerLayoutId;
-        private OpenCvCameraRotation rotation;
-        private int frameCount = 0;
-        private float avgFps;
-        private int avgPipelineTime;
-        private int avgOverheadTime;
-        private int avgTotalFrameTime;
-        private long currentFrameStartTime;
-        private final Object bitmapFrameLock = new Object();
-        private Continuation<? extends Consumer<Bitmap>> bitmapContinuation;
-        private Mat rotatedMat = new Mat();
-        private Mat matToUseIfPipelineReturnedCropped;
-        private Mat croppedColorCvtedMat = new Mat();
-        private Scalar brown = new Scalar(82, 61, 46, 255);
-        private OpModeNotificationsForOrientation opModeNotificationsForOrientation= new OpModeNotificationsForOrientation();
-        private ComponentCallbacksForRotation componentCallbacksForRotation = new ComponentCallbacksForRotation();
-        private volatile boolean hasBeenCleanedUp = false;
-        private final Object pipelineChangeLock = new Object();
-        private final Object viewportLock = new Object();
-        private MediaRecorder mediaRecorder;
-        private Surface mediaRecorderSurface;
-        private long mediaRecorderSurfaceNativeHandle;
-        private int width;
-        private int height;
-    }
+
+
     @Override
     public void runOpMode() throws InterruptedException {
 

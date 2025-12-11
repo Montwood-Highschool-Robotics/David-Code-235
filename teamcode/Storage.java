@@ -4,33 +4,27 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
 
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-
-import java.util.List;
-
-
-@TeleOp(name = "HCOB", group = "Real")
-@Disabled
+@TeleOp
 public class
-Robotics_Test extends LinearOpMode {
+Storage extends LinearOpMode {
     private DcMotor FLW;
     private DcMotor FRW;
     private DcMotor BLW;
@@ -39,12 +33,11 @@ Robotics_Test extends LinearOpMode {
     private DcMotor B;
     private DcMotor C;
     private DcMotor D;
-    /*private Servo Servo;
-    private CRServo CRServo;*/
+    //private Servo Servo;
+    //private CRServo CRServo;
     private CRServo C1;
     private CRServo C2;
     private CRServo C3;
-    private Limelight3A lightlimeA3;
     private ElapsedTime runtime = null;
     NormalizedColorSensor colorSensor;
     View relativeLayout;
@@ -52,8 +45,6 @@ Robotics_Test extends LinearOpMode {
     static final double STREAM_HEIGHT = 1080;
     OpenCvWebcam webcam;
     SamplePipeline pipeline;
-
-
 
 
     @Override
@@ -73,15 +64,11 @@ Robotics_Test extends LinearOpMode {
         CRServo C1 = hardwareMap.crservo.get("C1");
         CRServo C2 = hardwareMap.crservo.get("C2");
         CRServo C3 = hardwareMap.crservo.get("C3");
-        lightlimeA3 = hardwareMap.get(Limelight3A.class, "limelight");
-
-        telemetry.setMsTransmissionInterval(53);
 
         int relativeLayoutID = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "ID", hardwareMap.appContext.getPackageName());
         relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutID);
 
-        lightlimeA3.pipelineSwitch(0);
-
+/*
         try {
             runSample();
         } finally {
@@ -93,41 +80,11 @@ Robotics_Test extends LinearOpMode {
             });
         }
 
-        lightlimeA3.start();
+ */
 
-        telemetry.addData("Robot Ready:", "START!");
-        telemetry.update();
-        waitForStart();
 
-        /*
-        int cameraMonitorViewID =
-                hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        WebcamName webcamName = null;
-        webcamName = hardwareMap.get(WebcamName.class, "WebcamMain");
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
-        pipeline = new SamplePipeline();
-        webcam.setPipeline(pipeline);
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-
-            @Override
-            public void onError(int i) {
-
-            }
-
-            @Override
-            public void onOpened() {
-                webcam.startStreaming(STREAM_WITH, (int) STREAM_HEIGHT, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            public void OnError(int errorCode) {
-                telemetry.addData("Camera Failed", "");
-                telemetry.update();
-            }
-        });
         waitForStart();
         runtime.reset();
-             */
-
         while (opModeIsActive()) {
 
 
@@ -156,7 +113,7 @@ Robotics_Test extends LinearOpMode {
             C2.setDirection(DcMotorSimple.Direction.FORWARD);
             C3.setDirection(DcMotorSimple.Direction.FORWARD);
 
-            telemetry.addData("Active:","Set Up Complete");
+            telemetry.addData("Active:", "Set Up Complete");
             /*
             telemetry.addData("Numbers:", "1");
             */
@@ -195,7 +152,7 @@ Robotics_Test extends LinearOpMode {
             BRW.setPower(backRightPower * -1);
             //CRServo.setPower(crservoPower * 1);
 
-            /*Hammer
+            //Hammer (of Justice)
             if (gamepad1.right_trigger < 0.5) {
                 C3.setPower(-crservoPowerPlus / 3);
             } else if (gamepad1.left_trigger < 0.5) {
@@ -203,9 +160,8 @@ Robotics_Test extends LinearOpMode {
             } else {
                 C3.setPower(crservoPowerPlus - 1);
             }
-            */
 
-            //Rotator
+            /* Rotator
             if (gamepad2.dpad_left) {
                 C1.setPower(-crservoPowerPlus / 2);
             } else if (gamepad2.dpad_right) {
@@ -213,6 +169,7 @@ Robotics_Test extends LinearOpMode {
             } else {
                 C1.setPower(0);
             }
+            */
 
             //Shoot Chamber Angle
             if (gamepad2.dpad_down) {
@@ -241,7 +198,7 @@ Robotics_Test extends LinearOpMode {
                 B.setPower(0);
             }
 
-            /*Future Lift Slides
+            /*Future Slides
             if (gamepad2.right_trigger < 0.5) {
                 C.setPower(ABCDPower);
                 D.setPower(ABCDPower);
@@ -278,74 +235,11 @@ Robotics_Test extends LinearOpMode {
             }
             */
 
-            LLStatus lLStatus = lightlimeA3.getStatus();
-            telemetry.addData("Name", "%s",
-                    lLStatus.getName());
-            telemetry.addData("LL", "Temp: %.1fC, ",
-                    lLStatus.getTemp(), lLStatus.getCpu(), (int)lLStatus.getFps());
-            telemetry.addData("Pipeline", "Index: %d, Type: %s",
-                    lLStatus.getPipelineIndex(), lLStatus.getPipelineType());
-
-            LLResult lLResult = lightlimeA3.getLatestResult();
-            if (lLResult.isValid()){
-                Pose3D botpose = lLResult.getBotpose();
-                double captureLatency = lLResult.getCaptureLatency();
-                double targetingLatency = lLResult.getTargetingLatency();
-                double parseLatency = lLResult.getParseLatency();
-                telemetry.addData("LLLatency", captureLatency + targetingLatency);
-                telemetry.addData("ParseLatency", parseLatency);
-                telemetry.addData("PythonOutput", java.util.Arrays.toString(lLResult.getPythonOutput()));
-
-                telemetry.addData("tx", lLResult.getTx());
-                telemetry.addData("txnc", lLResult.getTxNC());
-                telemetry.addData("ty", lLResult.getTy());
-                telemetry.addData("tync", lLResult.getTyNC());
-
-                telemetry.addData("Botpose", botpose.toString());
-
-                List<LLResultTypes.BarcodeResult> barcodeResults = lLResult.getBarcodeResults();
-                for (LLResultTypes.BarcodeResult br : barcodeResults) {
-                    telemetry.addData("Barcode", "Data: %s", br.getData());
-                }
-
-                List<LLResultTypes.ClassifierResult> classifierResults = lLResult.getClassifierResults();
-                for (LLResultTypes.ClassifierResult cr : classifierResults) {
-                    telemetry.addData("Classifier", "Class: %s, Confidence: %.2f", cr.getClassName(), cr.getConfidence());
-                }
-
-                List<LLResultTypes.DetectorResult> detectorResults = lLResult.getDetectorResults();
-                for (LLResultTypes.DetectorResult dr : detectorResults) {
-                    telemetry.addData("Detector", "Class: %s, Area: %.2f", dr.getClassName(), dr.getTargetArea());
-                }
-
-                List<LLResultTypes.FiducialResult> fiducialResults = lLResult.getFiducialResults();
-                for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                    telemetry.addData("Fiducial", "Id: %.d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
-                }
-
-                List<LLResultTypes.ColorResult> colorResults = lLResult.getColorResults();
-                for (LLResultTypes.ColorResult clr : colorResults) {
-                    telemetry.addData("Colors", "X: %.2f, Y: %.2f", clr.getTargetXDegrees(), clr.getTargetYDegrees());
-                }
-            } else {
-                telemetry.addData("LightLime", "DataNotAvailable");
-            }
-
-            telemetry.update();
         }
-
-        lightlimeA3.stop();
     }
 
 
-    /*
-
-    public void looq() {
-        telemetry.addData("Image Analysis", pipeline.getAnalysis());
-    }
-    */
-
-
+/*
     protected void runSample() {
         float gain = 2;
         final float[] hsvValues = new float[3];
@@ -354,7 +248,7 @@ Robotics_Test extends LinearOpMode {
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "ColorSensor");
 
         if (colorSensor instanceof SwitchableLight) {
-            ((SwitchableLight)colorSensor).enableLight(true);
+            ((SwitchableLight) colorSensor).enableLight(true);
         }
         waitForStart();
         while (opModeIsActive()) {
@@ -376,7 +270,7 @@ Robotics_Test extends LinearOpMode {
             if (xButtonCurrentlyPressed != xButtonPreviouslyPressed) {
                 if (xButtonCurrentlyPressed) {
                     if (colorSensor instanceof SwitchableLight) {
-                        SwitchableLight light = (SwitchableLight)colorSensor;
+                        SwitchableLight light = (SwitchableLight) colorSensor;
                         light.enableLight(!light.isLightOn());
                     }
                 }
@@ -402,12 +296,50 @@ Robotics_Test extends LinearOpMode {
                     relativeLayout.setBackgroundColor(Color.HSVToColor(hsvValues));
                 }
             });
-
-            if (gamepad1.triangle && colors.red == 100 && colors.green == 212 && colors.blue == 170) {
+            if (colors.red == 100 && colors.green == 212 && colors.blue == 170) {
                 C1.setPower(0);
-            } else if (gamepad1.triangle && colors.red != 100 && colors.green != 212 && colors.blue != 170) {
+            } else {
                 C1.setPower(-crservoPower / 3);
             }
         }
     }
+ */
 }
+/*
+abstract class
+NotStorage extends OpMode {
+    static final int STREAM_WITH = 1920;
+    static final double STREAM_HEIGHT = 1080;
+    OpenCvWebcam webcam;
+    SamplePipeline pipeline;
+    @Override
+    public void init() {
+        int cameraMonitorViewID =
+                hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        WebcamName webcamName = null;
+        webcamName = hardwareMap.get(WebcamName.class, "WebcamMain");
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
+        pipeline = new SamplePipeline();
+        webcam.setPipeline(pipeline);
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onError(int i) {
+
+            }
+
+            @Override
+            public void onOpened() {
+                webcam.startStreaming(STREAM_WITH, (int) STREAM_HEIGHT, OpenCvCameraRotation.UPRIGHT);
+            }
+            public void OnError(int errorCode) {
+                telemetry.addData("Camera Failed", "");
+                telemetry.update();
+            }
+        });
+    }
+    @Override
+    public void loop() {
+        telemetry.addData("Image Analysis", pipeline.getAnalysis());
+    }
+}
+*/
